@@ -14,9 +14,9 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import *
-#import chromedriver_autoinstaller
+import chromedriver_autoinstaller
 
-#chromedriver_autoinstaller.install()
+chromedriver_autoinstaller.install()
 
 # ==================== CONFIG ====================
 CSV_FILE = "africa_fiber_operators_with_LinkedIn_Profile.csv"
@@ -29,39 +29,20 @@ MAX_WAIT = 20
 
 def get_driver():
     options = Options()
-    options.binary_location = "/usr/bin/google-chrome"
-    
-    options.add_argument("--headless=new")
     options.add_argument("--start-maximized")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--disable-gpu")
-    options.add_argument("--window-size=1920,1080")
-    options.add_argument("--disable-extensions")
-    options.add_argument("--disable-software-rasterizer")
-    options.add_argument("--remote-debugging-port=9222")
-
     options.add_experimental_option("excludeSwitches", ["enable-automation"])
     options.add_experimental_option("useAutomationExtension", False)
 
-    try:
-        print("Attempting to connect to ChromeDriver service on port 9515...")
-        # Connect to the running ChromeDriver service
-        driver = webdriver.Remote(
-            command_executor='http://127.0.0.1:9515',
-            options=options
-        )
-        print("✅ Chrome connected successfully!")
+    service = Service(chromedriver_autoinstaller.install())
+    driver = webdriver.Chrome(service=service, options=options)
 
-        driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
-            "source": "Object.defineProperty(navigator, 'webdriver', {get: () => false});"
-        })
-
-        return driver
-    except Exception as e:
-        print(f"❌ Error creating driver: {e}")
-        raise
+    driver.execute_cdp_cmd("Page.addScriptToEvaluateOnNewDocument", {
+        "source": "Object.defineProperty(navigator, 'webdriver', {get: () => false});"
+    })
+    return driver
 
 def random_sleep(min_sec=3, max_sec=8):
     time.sleep(random.uniform(min_sec, max_sec))
